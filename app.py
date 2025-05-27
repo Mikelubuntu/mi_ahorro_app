@@ -124,26 +124,26 @@ def dashboard():
             flash("Introduce un ahorro inicial válido.", "danger")
 
     if request.method == 'POST' and 'ingreso' in request.form and objetivo:
-    try:
-        importe = float(request.form['ingreso'])
-        desc = request.form.get('descripcion', '')
-        if importe > 0:
-            movimiento = Movimiento(importe=importe, descripcion=desc, usuario_id=user.id)
-            db.session.add(movimiento)
-            db.session.commit()
-            flash(f"Aporte añadido: {importe:.2f} €", "success")
-            # NOTIFICAR a TODOS los usuarios, incluido el que hace el aporte
-            usuarios = Usuario.query.all()
-            for destinatario in usuarios:
-                if desc:
-                    mensaje = f"{user.nombre} ha hecho un aporte de {importe:,.2f} €: {desc}"
-                else:
-                    mensaje = f"{user.nombre} ha hecho un aporte de {importe:,.2f} €"
-                noti = Notificacion(mensaje=mensaje, usuario_id=destinatario.id)
-                db.session.add(noti)
-            db.session.commit()
-    except ValueError:
-        flash("Introduce un valor válido.", "danger")
+        try:
+            importe = float(request.form['ingreso'])
+            desc = request.form.get('descripcion', '')
+            if importe > 0:
+                movimiento = Movimiento(importe=importe, descripcion=desc, usuario_id=user.id)
+                db.session.add(movimiento)
+                db.session.commit()
+                flash(f"Aporte añadido: {importe:.2f} €", "success")
+                # NOTIFICAR a TODOS los usuarios, incluido el que hace el aporte
+                usuarios = Usuario.query.all()
+                for destinatario in usuarios:
+                    if desc:
+                        mensaje = f"{user.nombre} ha hecho un aporte de {importe:,.2f} €: {desc}"
+                    else:
+                        mensaje = f"{user.nombre} ha hecho un aporte de {importe:,.2f} €"
+                    noti = Notificacion(mensaje=mensaje, usuario_id=destinatario.id)
+                    db.session.add(noti)
+                db.session.commit()
+        except ValueError:
+            flash("Introduce un valor válido.", "danger")
 
     total_ahorrado = db.session.query(db.func.sum(Movimiento.importe)).scalar() or 0
     objetivo_30 = objetivo.monto * 0.3 if objetivo else 0
