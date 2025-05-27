@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Ahorro en pareja 🏡</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Google Fonts: Quicksand y Nunito -->
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    ::selection { background: #b9ecec; }
+    body::-webkit-scrollbar { width:10px; background: #ecf5fb; }
+    body::-webkit-scrollbar-thumb { background: #b9ecec; border-radius: 7px; }
+    main {
+      min-height: 75vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav-bar">
+    <div class="nav-content">
+      <svg class="nav-logo" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#007aff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;">
+        <path d="M3 11.5L12 4l9 7.5" />
+        <path d="M9 22V12h6v10" />
+        <path d="M21 22H3" />
+      </svg>
+      <span class="nav-title">Ahorro en pareja</span>
+      <span class="nav-slogan">Juntos por nuestro hogar <span class="emoji">🏡</span></span>
+    </div>
+    <div style="position:relative; display:inline-block; margin-left:18px;">
+  <a href="#" id="notiBell" onclick="toggleNotiPanel(event)" style="color:inherit; text-decoration:none;">
+    {% if notificaciones_nuevas and notificaciones_nuevas|length > 0 %}
+      <span id="notiBadge" style="
+        position:absolute;
+        top:0;
+        right:-7px;
+        background:#e74c3c;
+        color:white;
+        border-radius:12px;
+        font-size:0.77em;
+        padding:2px 7px;
+        font-weight:700;
+        box-shadow:0 1px 3px #b22;
+        z-index:10;
+      ">
+        {{ notificaciones_nuevas|length }}
+      </span>
+    {% endif %}
+  </a>
+  <div id="notiPanel" style="display:none; position:absolute; right:-32px; top:38px; background: #fff; box-shadow: 0 4px 16px #0002; border-radius:13px; min-width:260px; z-index:99;">
+    <div style="padding:12px 16px;">
+      <b>Notificaciones</b>
+      <hr style="margin:7px 0;">
+      {% if notificaciones_nuevas and notificaciones_nuevas|length > 0 %}
+        <ul style="list-style:none; padding-left:0;">
+        {% for notif in notificaciones_nuevas %}
+          <li style="margin-bottom:12px;">
+            <a href="{{ notif.url }}" target="_blank"><b>{{ notif.titulo }}</b></a>:
+            {% if notif.marcado_interesante == 1 %}
+              <span style="color:green;">¡Le interesa!</span>
+            {% elif notif.marcado_interesante == -1 %}
+              <span style="color:#c22;">No le interesa.</span>
+            {% endif %}
+          </li>
+        {% endfor %}
+        </ul>
+      {% else %}
+        <span style="color:#888;">No tienes notificaciones nuevas</span>
+      {% endif %}
+    </div>
+  </div>
+</div>
+<script>
+function toggleNotiPanel(event) {
+  event.preventDefault();
+  var panel = document.getElementById("notiPanel");
+  panel.style.display = (panel.style.display === "block") ? "none" : "block";
+  // Cierra el panel si haces clic fuera
+  window.onclick = function(e){
+    if(!e.target.closest('#notiPanel') && !e.target.closest('#notiBell')){
+      panel.style.display = "none";
+    }
+  }
+}
+</script>
+  </nav>
+
+  <main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="alert-messages">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="main-footer">
+    <small>App hecha con <span class="emoji">💙</span> - {{ 2025 }}</small>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="glass-card" style="max-width:660px; margin-top:44px;">
+
+  {% if notificaciones_nuevas %}
+    <div class="toast-flotante" id="toast-noti">
+      <ul>
+        {% for notif in notificaciones_nuevas %}
+          <li>{{ notif.mensaje }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        var toast = document.getElementById('toast-noti');
+        if (toast) {
+          toast.onclick = function() {
+            window.location.href = "{{ url_for('anuncios') }}";
+          }
+        }
+      });
+    </script>
+  {% endif %}
+
+  <header class="ahorro-header text-center" style="margin-bottom:32px;">
+    <span style="font-size: 48px; display: block; margin-bottom: 8px;">🏡</span>
+    <h1 style="margin-bottom:4px;">¡Hola {{ usuario }}!</h1>
+    <p class="slogan" style="color:#607799; font-size:1.08em;">¡Cada euro suma! <span class="emoji">💪</span></p>
+  </header>
+
+  <div class="botones-anuncios" style="display: flex; gap:12px; justify-content:center; margin-bottom:20px;">
+    <a href="{{ url_for('nuevo_anuncio') }}" class="btn-aportar">Añadir anuncio de vivienda interesante</a>
+    <a href="{{ url_for('anuncios') }}" class="btn-aportar">Ver anuncios</a>
+  </div>
+
+  {% if not objetivo %}
+    <section>
+      <form method="POST" autocomplete="off">
+        <label>¿Cuál es el precio de la casa? 🏡</label>
+        <input type="number" step="0.01" name="objetivo" placeholder="Ej: 120000" required>
+        <button class="btn-aportar" type="submit">Guardar objetivo</button>
+      </form>
+    </section>
+  {% elif user.ahorro_inicial == 0 %}
+    <section>
+      <form method="POST" autocomplete="off">
+        <label>¿Cuánto tenéis ya ahorrado? 💶</label>
+        <input type="number" step="0.01" name="ahorro_inicial" placeholder="Ej: 5000" required>
+        <button class="btn-aportar" type="submit">Añadir ahorro inicial</button>
+      </form>
+    </section>
+  {% else %}
+    <section style="margin-bottom:22px;">
+      <div>
+        <div style="display:flex; align-items:center; gap:16px; margin-bottom: 12px;">
+          <span style="font-size:1.7em;">🏦</span>
+          <span style="font-size:1.3em; font-weight:700;">{{ total_ahorrado|moneda }}</span>
+          <span class="progreso-label" style="color:#5a7fa8;">Total ahorrado</span>
+        </div>
+        <!-- Barra de progreso hacia el objetivo total -->
+        <div class="barra-progreso-wrap">
+          <div class="barra-progreso-bg">
+            <div class="barra-progreso-fill"
+                style="width:{{ (total_ahorrado/objetivo)*100 if objetivo else 0 }}%; background:#2676c5;"></div>
+          </div>
+          <div class="progreso-meta" style="display:flex; justify-content:space-between; margin-top:2px;">
+            <span>Meta: {{ objetivo|moneda }}</span>
+            <span class="entrada-pill">Entrada (30%): {{ objetivo_30|moneda }}</span>
+          </div>
+        </div>
+        <!-- Segunda barra: progreso hacia la entrada -->
+        <div class="barra-progreso-wrap" style="margin-top: 16px;">
+          <div class="barra-progreso-bg">
+            <div class="barra-progreso-fill"
+                  style="width:{{ (total_ahorrado/objetivo_30)*100 if objetivo_30 else 0 }}%; background:#8ecafc;"></div>
+          </div>
+          <div class="progreso-meta" style="display:flex; justify-content:space-between; margin-top:2px;">
+            <span>Progreso para la entrada (30%)</span>
+            <span>{{ (total_ahorrado if total_ahorrado < objetivo_30 else objetivo_30)|moneda }} / {{ objetivo_30|moneda }}</span>
+          </div>
+        </div>
+
+        {% if total_ahorrado >= objetivo_30 %}
+          <div class="pill pill-success mt-2">¡Listos para la entrada! 🎉</div>
+        {% else %}
+          <div class="pill pill-warning mt-2">Faltan {{ (objetivo_30 - total_ahorrado)|moneda }} para la entrada</div>
+        {% endif %}
+        {% if meses_restantes > 0 %}
+          <div class="pill pill-info mt-2">
+            Al ritmo actual, te faltarían aprox. <b>{{ meses_restantes }}</b> mes{{ "es" if meses_restantes > 1 else "" }} para lograr el 30% de entrada.
+          </div>
+        {% elif objetivo_30 > 0 and total_ahorrado < objetivo_30 %}
+          <div class="pill pill-info mt-2">
+            No hay suficientes datos para estimar el tiempo (añade más aportes).
+          </div>
+        {% endif %}
+      </div>
+    </section>
+
+    <section style="margin-bottom:18px;">
+      <form method="get" action="{{ url_for('dashboard') }}" class="form-inline text-center" style="display:flex; align-items:center; gap:12px;">
+        <label for="simulado" style="font-weight: bold;">¿Cuánto puedes aportar al mes?</label>
+        <input type="number" step="0.01" min="1" name="simulado" id="simulado"
+               placeholder="Ej: 400"
+               value="{{ simulado if simulado else '' }}"
+               style="max-width:100px;">
+        <button type="submit" class="btn-aportar" style="padding:2px 16px;">Calcular</button>
+      </form>
+      {% if meses_simulado is defined and simulado %}
+        <div class="pill pill-info mt-2">
+          Aportando <b>{{ simulado|moneda }}</b> al mes, tardarías aprox. <b>{{ meses_simulado }}</b> mes{{ "es" if meses_simulado > 1 else "" }} en llegar al 30% de la entrada.
+        </div>
+      {% endif %}
+    </section>
+
+    <section class="grafica-seccion" style="margin-bottom:34px;">
+      <h2 style="font-size:1.15em; margin-bottom:12px;">Evolución del ahorro</h2>
+      <canvas id="evolucionAhorro" height="48"></canvas>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script>
+        const ctx = document.getElementById('evolucionAhorro').getContext('2d');
+        const chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: {{ fechas | tojson }},
+            datasets: [{
+              label: 'Ahorro acumulado (€)',
+              data: {{ acumulado | tojson }},
+              fill: false,
+              borderColor: '#2676c5',
+              backgroundColor: '#2676c5',
+              tension: 0.2,
+              pointRadius: 3
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              x: { title: { display: false } },
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function(value, index, values) {
+                    return value.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+                  }
+                }
+              }
+            }
+          }
+        });
+      </script>
+    </section>
+
+    <section style="margin-bottom:26px;">
+      <form method="POST" autocomplete="off" style="display:flex; gap:12px; align-items:end; flex-wrap:wrap;">
+        <div style="flex:2;">
+          <label>Nuevo aporte 💸</label>
+          <input type="number" step="0.01" name="ingreso" placeholder="¿Cuánto sumamos?" required>
+        </div>
+        <div style="flex:3;">
+          <label class="d-none d-md-inline">&nbsp;</label>
+          <input type="text" name="descripcion" placeholder="Ejemplo: Ahorro, paga extra..." maxlength="30">
+        </div>
+        <div>
+          <button class="btn-aportar" type="submit" style="min-width: 120px;">Aportar</button>
+        </div>
+      </form>
+    </section>
+
+    <section>
+      <h2 style="margin-top:24px; font-size:1.12em;">Movimientos recientes</h2>
+      {% if todos_los_movimientos %}
+        <ul>
+          {% for mov in todos_los_movimientos %}
+            <li style="display:flex; align-items:flex-start; gap:12px; margin-bottom:18px;">
+              <span style="font-size:1.4em; margin-top:3px;">💶</span>
+              <div style="flex:1;">
+                <div style="font-weight:600;">{{ mov.importe|moneda }}</div>
+                <div style="color:#607799; margin-bottom:4px;">{{ mov.descripcion }}</div>
+                <div style="font-size:0.97em; color:#90a4c7;">
+                  {% if mov.autor == usuario %}
+                    Tú
+                  {% else %}
+                    {{ mov.autor }}
+                  {% endif %}
+                  <span style="margin-left:8px; color:#bcc6d5;">{{ mov.fecha }}</span>
+                  {% if mov.autor == usuario %}
+                    <a href="{{ url_for('editar_movimiento', mov_id=mov.id) }}" style="margin-left:10px; color:#2676c5; text-decoration:underline; font-size:0.96em;">✏️ Editar</a>
+                  {% endif %}
+                </div>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="empty-state">
+          <img src="{{ url_for('static', filename='img/empty_piggy.svg') }}" width="120" alt="Empty">
+          <div class="empty-msg">Todavía no hay movimientos.<br>¡Haz el primero y verás la magia! 🏦✨</div>
+        </div>
+      {% endif %}
+      <div style="margin-top:24px; text-align:center;">
+        <a href="{{ url_for('logout') }}" class="btn-aportar" style="display:inline-block;">Cerrar sesión</a>
+      </div>
+    </section>
+  {% endif %}
+
+</div>
+{% endblock %}

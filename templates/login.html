@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container" style="max-width: 420px;">
+  <div class="glass-card shadow-lg p-4 my-5">
+    <div class="text-center mb-3">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#2676c5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:8px;">
+        <circle cx="12" cy="8" r="4"/>
+        <path d="M4 20v-1a7 7 0 0114 0v1"/>
+      </svg>
+      <h2 class="fw-bold" style="color:#2676c5;">Iniciar sesión</h2>
+      <p class="text-muted">Ahorro en pareja <span class="emoji">🏡</span></p>
+    </div>
+    <form method="POST" autocomplete="off">
+      <div class="mb-3">
+        <label for="usuario">Nombre de usuario</label>
+        <input type="text" id="usuario" name="usuario" required autofocus>
+      </div>
+      <div class="mb-3">
+        <label for="clave">Contraseña</label>
+        <input type="password" id="clave" name="clave" required>
+      </div>
+      <div class="d-grid gap-2">
+        <button type="submit" class="btn-aportar">Entrar</button>
+      </div>
+    </form>
+    <div class="text-center mt-4 small text-muted">
+      <span>¡Vuestro reto empieza aquí! <span class="emoji">💙</span></span>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="glass-card" style="max-width:450px;">
+  <h2 style="margin-bottom:22px;">Enviar anuncio de vivienda</h2>
+  <form method="POST" autocomplete="off">
+    <label for="titulo">Título</label>
+    <input type="text" name="titulo" id="titulo" required maxlength="150">
+    <label for="url">URL del anuncio</label>
+    <input type="url" name="url" id="url" required maxlength="400">
+    <label for="comentario">Comentario</label>
+    <textarea name="comentario" id="comentario" maxlength="500" rows="3"></textarea>
+    <button type="submit" class="btn-aportar" style="margin-top:10px;">Enviar anuncio</button>
+    <a href="{{ url_for('dashboard') }}" class="btn-aportar volver-dashboard" style="background:#bbc3d2; color:#234; margin-top:12px;">Cancelar</a>
+  </form>
+</div>
+{% endblock %}

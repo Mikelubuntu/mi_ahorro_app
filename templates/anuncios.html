@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="glass-card" style="max-width:520px;">
+  <h2 style="margin-bottom:24px; color:#2676c5;">Anuncios recibidos</h2>
+  {% if anuncios_recibidos %}
+    <ul>
+      {% for anuncio in anuncios_recibidos %}
+        <li>
+          <a href="{{ anuncio.url }}" target="_blank" style="font-weight:700; color:#234; text-decoration:none;">{{ anuncio.titulo }}</a>
+          <br>
+          <span style="color:#607799;">{{ anuncio.comentario }}</span>
+          <br>
+          {% if anuncio.marcado_interesante == 0 %}
+            <form method="POST" style="margin-top:12px;">
+              <input type="hidden" name="anuncio_id" value="{{ anuncio.id }}">
+              <button type="submit" name="accion" value="si" class="btn-aportar" style="margin-right:6px;">Me interesa</button>
+              <button type="submit" name="accion" value="no" class="btn-aportar">No me interesa</button>
+            </form>
+          {% else %}
+            {% if anuncio.marcado_interesante == 1 %}
+              <span class="pill pill-success" style="margin-top:12px; display:inline-block;">Marcado como interesante ✅</span>
+            {% else %}
+              <span class="pill pill-warning" style="margin-top:12px; display:inline-block;">Marcado como NO interesante ❌</span>
+            {% endif %}
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="empty-state">
+      No tienes anuncios nuevos.
+    </div>
+  {% endif %}
+
+  {% if notificaciones %}
+    <div class="alert alert-info mt-3" style="margin-top:28px;">
+      <b>Respuestas a tus anuncios:</b>
+      <ul>
+        {% for notif in notificaciones %}
+          <li>
+            {{ notif.titulo }} -
+            {% if notif.marcado_interesante == 1 %}
+              ¡Le interesa!
+            {% elif notif.marcado_interesante == -1 %}
+              No le interesa.
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <!-- BOTONES DE ARCHIVAR ANUNCIOS, visual y centrados -->
+  <div style="display: flex; gap:18px; justify-content:center; margin:32px 0 0 0;">
+    <form method="POST" action="{{ url_for('limpiar_anuncios_recibidos') }}">
+      <button type="submit" class="btn-aportar btn-aportar-small">🗑️ Archivar recibidos</button>
+    </form>
+    <form method="POST" action="{{ url_for('limpiar_anuncios_enviados') }}">
+      <button type="submit" class="btn-aportar btn-aportar-small">🗑️ Archivar enviados</button>
+    </form>
+  </div>
+
+  <!-- HISTORIAL DE ANUNCIOS ARCHIVADOS -->
+  <h3 style="margin-top:38px; color:#7e8fa5;">Historial de anuncios archivados</h3>
+  {% if anuncios_archivados %}
+    <ul>
+      {% for anuncio in anuncios_archivados %}
+        <li>
+          <span style="font-weight:700; color:#234;">{{ anuncio.titulo }}</span>
+          <span style="color:#888;">(Archivado el {{ anuncio.fecha_creacion.strftime('%d/%m/%Y') }})</span>
+          <br>
+          <span style="color:#607799;">{{ anuncio.comentario }}</span>
+          <br>
+          {% if anuncio.destinatario_id == user_id %}
+            <span style="font-size:0.98em; color:#607799;">(Recibido)</span>
+          {% else %}
+            <span style="font-size:0.98em; color:#caa129;">(Enviado)</span>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="empty-state" style="margin-bottom:0;">
+      No tienes anuncios archivados.
+    </div>
+  {% endif %}
+
+  <div style="margin-top:36px; text-align:center;">
+    <a href="{{ url_for('dashboard') }}" class="btn-aportar">Volver al dashboard</a>
+  </div>
+</div>
+{% endblock %}
