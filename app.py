@@ -62,15 +62,6 @@ class Notificacion(db.Model):
 with app.app_context():
     db.create_all()
 
-@app.route('/crear_usuario')
-def crear_usuario():
-    if Usuario.query.filter_by(nombre="Mikel").first() is None:
-        db.session.add(Usuario(nombre="Mikel", password=generate_password_hash("0022")))
-    if Usuario.query.filter_by(nombre="Monica").first() is None:
-        db.session.add(Usuario(nombre="Monica", password=generate_password_hash("0022")))
-    db.session.commit()
-    return "Usuarios creados (recuerda borrar esta ruta luego)"
-
 @app.route('/cambiar_password/<nombre>/<nueva>')
 def cambiar_password(nombre, nueva):
     user = Usuario.query.filter_by(nombre=nombre).first()
