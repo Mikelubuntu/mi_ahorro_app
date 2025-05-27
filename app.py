@@ -261,6 +261,19 @@ def nuevo_anuncio():
         return render_template("anuncio_exito.html")
     return render_template("nuevo_anuncio.html")
 
+@app.route('/anuncios_archivados')
+def anuncios_archivados():
+    if 'usuario_id' not in session:
+        return redirect(url_for('login'))
+    user = Usuario.query.get(session['usuario_id'])
+    # Mostramos tanto enviados como recibidos archivados
+    archivados_recibidos = Anuncio.query.filter_by(destinatario_id=user.id, archivado=True).order_by(Anuncio.fecha_creacion.desc()).all()
+    archivados_enviados = Anuncio.query.filter_by(creado_por=user.id, archivado=True).order_by(Anuncio.fecha_creacion.desc()).all()
+    return render_template('anuncios_archivados.html',
+                           archivados_recibidos=archivados_recibidos,
+                           archivados_enviados=archivados_enviados)
+
+
 @app.route('/anuncios', methods=['GET', 'POST'])
 def anuncios():
     if 'usuario_id' not in session:

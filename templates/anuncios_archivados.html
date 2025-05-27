@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="glass-card" style="max-width:600px;">
+    <h2 style="color:#2676c5;">Anuncios archivados</h2>
+    <h3 style="margin-top:26px; color:#607799;">Recibidos</h3>
+    {% if archivados_recibidos %}
+        <ul>
+        {% for anuncio in archivados_recibidos %}
+            <li>
+                <b>{{ anuncio.titulo }}</b><br>
+                <span style="color:#607799;">{{ anuncio.comentario }}</span>
+                <br>
+                <span style="font-size:0.98em; color:#90a4c7;">
+                    Archivado el {{ anuncio.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}
+                </span>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <div class="empty-state">No tienes anuncios recibidos archivados.</div>
+    {% endif %}
+
+    <h3 style="margin-top:34px; color:#bb8915;">Enviados</h3>
+    {% if archivados_enviados %}
+        <ul>
+        {% for anuncio in archivados_enviados %}
+            <li>
+                <b>{{ anuncio.titulo }}</b><br>
+                <span style="color:#607799;">{{ anuncio.comentario }}</span>
+                <br>
+                <span style="font-size:0.98em; color:#90a4c7;">
+                    Archivado el {{ anuncio.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}
+                </span>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <div class="empty-state">No tienes anuncios enviados archivados.</div>
+    {% endif %}
+</div>
+{% endblock %}
