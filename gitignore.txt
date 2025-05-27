@@ -1,0 +1,5 @@
+ahorro.db
+__pycache__/
+*.pyc
+instance/
+.env
