@@ -174,6 +174,7 @@ def dashboard():
 
     # --------- NOTIFICACIONES NUEVAS ---------
     notificaciones_nuevas = Notificacion.query.filter_by(usuario_id=user.id, leida=False).all()
+    print(f"Usuario {user.nombre} tiene {len(notificaciones_nuevas)} notificaciones nuevas")
     for notif in notificaciones_nuevas:
         notif.leida = True
     db.session.commit()
