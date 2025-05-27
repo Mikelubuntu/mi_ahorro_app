@@ -1,6 +1,4 @@
-ahorro.db
 __pycache__/
 *.pyc
-instance/
 .env
 init_db.py

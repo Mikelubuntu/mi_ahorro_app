@@ -1,3 +1,5 @@
+import os
+os.makedirs('instance', exist_ok=True)
 from flask import Flask, render_template, request, redirect, url_for, session, flash, abort
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -320,6 +322,14 @@ def limpiar_anuncios_enviados():
     db.session.commit()
     flash("Tus anuncios enviados han sido archivados.", "success")
     return redirect(url_for('dashboard'))
+
+@app.route('/ver_usuarios')
+def ver_usuarios():
+    usuarios = Usuario.query.all()
+    return "<br>".join([f"{u.id} - {u.nombre} - {u.password}" for u in usuarios])
+
+import os
+print("¿Existe ahorro.db?", os.path.isfile('ahorro.db'))
 
 import os
 
