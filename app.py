@@ -7,7 +7,7 @@ from collections import defaultdict
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # Cambia esto en producción
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///C:/xampp/htdocs/mi_ahorro_app/ahorro.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ahorro.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
